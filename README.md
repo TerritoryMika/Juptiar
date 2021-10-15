@@ -1,10 +1,11 @@
 ![juptiar](https://i.ibb.co/ZSyTLsK/juptiar.png)
-# Juptiar Project
+# Project Juptiar
 ## Index
  1. [Introduction](#introduction)
  2. [How to use](#tutorial)
+ 3. [Document](#operator)
 ## Introduction
-**Juptiar Project** consist of 2 part : **Juptiar Script**  and **.jur File**. I made mostly for random text genratoring
+**Project Juptiar** consist of 2 part : **Juptiar Script**  and **.jur File**. I made mostly for random text genratoring
 
 (pretty useful generating slightly different textbook program)
 
@@ -22,6 +23,7 @@ Example :
 The file describle where the value should be inserted to. Which can later be used on mass production
 
 Example :
+`test.jur`
 ```
 {
 	name = mary
@@ -39,16 +41,20 @@ Example :
 ```
 
 ## Tutorial
-Run the .jar file in command prompt
+
+### Execution
+Run the follow command that runs .jar file in command prompt
 ```
 java -jar Juptiar.jar <Target File> <Time> <Output File>
 ```
-There are 3 mode for the program :
+___
+### Modes
+
+There are 2 modes for the program :
  - **Interpreter Mode**
  - **Simulation Mode**
- - **Output Mode**
 
-### Interpreter Mode
+#### Interpreter Mode
 When there is no target file or the target file done outputing, the program enter **Interpreter Mode**
 ```
 > <input>
@@ -59,3 +65,71 @@ When there is no target file or the target file done outputing, the program ente
 ```
 Entering a 3 will gives you back a 3!
 Here you can test all types of combination of code
+```
+> /
+Juptiar Halted
+```
+use a single `/` to halt the program
+
+#### Simulation Mode
+When there is a target file is selected, the program enter **Simulation Mode** and simulate the targeted file. It will enter **Interpreter Mode** afterwards
+```
+java -jar Juptiar.jar test.jur
+```
+```
+	Q  :  mary sold a pair of sport shoes at $1260.0.
+	the sport shoes was original cost $900.
+	How much does she earned?
+
+	A  :  She earned $360.0
+
+> 
+```
+## Operator
+### Basic
+Here are the major operator that can be used in **Juptiar Script**
+#### "=" (Assign)
+```
+v = 3
+```
+*\*assign the value 3 to `v`*
+#### "|" (Or)
+```
+v = l | r
+```
+*\*randomly pick one between `l` and `r` value and assign it to `v`*
+#### "->" (Unstable Assign)
+```
+v -> l | r
+```
+*\*everytime `v` is called, it will randomly return `l` or `r`*
+#### "~" (Random Between)
+```
+v = n1 ~ n2
+```
+*\*randomly pick a `Integer` between `n1` and `n2` value and assign it to `v`*
+#### "+" , "-" , "\*" , "/" , "%" (Basic Maths)
+```
+v = 1000 + 24 * 6 -2
+```
+#### "f+" , "f-" , "f*" , "f/" (Float Maths)
+```
+v = 5 f/ 100
+```
+
+___
+### Other Example
+#### Multiple Assignment
+```
+a = b = c = 5
+```
+*\*multiple assignment could be done as `=` will returns right value, which in this case : 5*
+#### "|" Capability
+```
+name = John | Maggie
+```
+*\*`|` can be used other than numbers*
+```
+a | b = c | d
+```
+*\*`|` can be used for left value*
