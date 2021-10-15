@@ -21,8 +21,12 @@ public class Main {
 		System.out.println("### Juptiar Interpreter ###");
 		
 		try {
-			if(args.length == 1) read(args[0]);
-			if(args.length == 2) {
+			if(args.length == 1 && args[0].endsWith(".jur")) read(args[0]);
+			if(args.length == 2 && args[0].endsWith(".jur")) {
+				for(int i = 0; i < Integer.parseInt(args[1]); i++) 
+					read(args[0]);
+			}
+			if(args.length == 3 && args[0].endsWith(".jur")) {
 				for(int i = 0; i < Integer.parseInt(args[1]); i++) 
 					read(args[0]);
 			}
@@ -33,13 +37,16 @@ public class Main {
 
 		System.out.print("> ");
 		while(scan.hasNextLine()) {
-			System.out.println(Expression.toExpression(scan.nextLine()).solve());
+			String input = scan.nextLine();
+			if(input.equals("/")) break;
+			System.out.println(Expression.toExpression(input).solve());
 			System.out.print("> ");
 		}
+		System.out.println("##### Juptiar Halted ######");
 		scan.close();
 	}
 	
-	public static String read(String fileName) throws FileNotFoundException {
+	public static void read(String fileName) throws FileNotFoundException {
 		Scanner scan = new Scanner(new File(fileName));
 		boolean mode_command = false;
 		boolean mode_text = false;
@@ -69,7 +76,6 @@ public class Main {
 		}
 		scan.close();
 		System.out.println();
-		return null;
 	}
 	
 	
@@ -201,7 +207,7 @@ class Expression {
 		
 		if(expression.noNode()) {
 			String matched = null;
-			if(pointerMap.containsKey(value)) matched = solveExpression(pointerMap.get(expression.getValue()));
+			if(unstableMap.containsKey(value)) matched = solveExpression(unstableMap.get(expression.getValue()));
 			if(variableMap.containsKey(value)) matched = variableMap.get(value);
 			if(matched != null) return matched;
 		}
@@ -221,18 +227,18 @@ class Expression {
 	public static void operatorListInit_prelude() {
 		operatorList.add(constructOperation_HigherOrder("?", (L, R) -> {
 			Expression ex1; String ex2;
-			if((ex1 = pointerMap.get(R.getValue())) != null) return ex1.express();
+			if((ex1 = unstableMap.get(R.getValue())) != null) return ex1.express();
 			if((ex2 = variableMap.get(R.getValue())) != null) return ex2;
 			return R.express();
 		}));
 		operatorList.add(constructOperation_HigherOrder("->", (L, R) -> {
-			if(L != null && R != null) pointerMap.put(L.getValue(), R);
+			if(L != null && R != null) unstableMap.put(L.getValue(), R);
 			return solveExpression(R);
 		}));
 		operatorList.add(constructOperation("@", (L, R) -> {
 			if(R.equals("o")) operatorList.forEach((value) -> { System.out.println(" - " + value.getValue());});
 			if(R.equals("v")) variableMap.forEach((key, value) -> { System.out.println(" - " + key);});
-			if(R.equals("p")) pointerMap.forEach((key, value) -> { System.out.println(" - " + key);});
+			if(R.equals("p")) unstableMap.forEach((key, value) -> { System.out.println(" - " + key);});
 			return null;
 		}));
 		operatorList.add(constructOperation("=", (L, R) -> {
@@ -333,7 +339,7 @@ class Expression {
 	public static List<Operator> operatorList = new ArrayList<Operator>();
 
 	public static Map<String, String> variableMap = new HashMap<String, String>();
-	public static Map<String, Expression> pointerMap = new HashMap<String, Expression>();
+	public static Map<String, Expression> unstableMap = new HashMap<String, Expression>();
 }
 
 interface Operator {
