@@ -109,14 +109,19 @@ v = n1 ~ n2
 ```
 *\*randomly pick a `Integer` between `n1` and `n2` value and assign it to `v`*
 #### "+" , "-" , "\*" , "/" , "%" (Basic Maths)
-```
-v = 1000 + 24 * 6 -2
-```
 #### "f+" , "f-" , "f*" , "f/" (Float Maths)
+#### "==" , "!=" , ">" , "<" , ">=" , "<=" (Logic Operation)
+*\*return 0 as `false`, 1 as `true`*
+#### "=>" , ":" (If-statement)
 ```
-v = 5 f/ 100
+(c) => ( true : false )
 ```
-
+*\*if `c` is 0, return true. otherwise, false*
+#### "\[^\]" (Accumulator)
+```
+t [^] ( n1 + n2 )
+```
+*\*the right value(`n2`) will stack(`+`) to the left value(`n1`), multiple time(`t`), which is equivalent to `n1 + (n2 * t)`*
 ___
 ### Other Example
 #### Multiple Assignment
@@ -133,3 +138,15 @@ name = John | Maggie
 a | b = c | d
 ```
 *\*`|` can be used for left value*
+___
+### Debug Command
+#### "?" (Express)
+```
+> n -> ( 0 ~ 10 )
+4
+> n
+7
+> ? n
+( 0 ~ 10 )
+```
+*\*`?` can express the right value in express form*
