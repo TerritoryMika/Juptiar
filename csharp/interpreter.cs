@@ -77,7 +77,6 @@ public class Program
 
 				// re-new all variable
 				envirMain.execute("!clear*");
-				envirMain.run("name");
 			}
 		}
 
