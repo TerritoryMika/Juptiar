@@ -1,18 +1,93 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
+using System.IO;
 
 public class Program
 {
-	public static void Main()
+	public static void Main(String[] args)
 	{
 		JupEnvironment envirMain = new JupEnvironment();
 
 		envirMain.loadLibrary(new JupPrelude(envirMain));
 
+		// simulationMode
+		
+		if (args.Length >= 1)
+		{
+			int arg2 = (args.Length >= 2)? Int32.Parse(args[1]) : 1;
+
+			// outputMode
+			String arg3 = (args.Length >= 3)? args[2] : "";
+			bool outputMode = !arg3.Equals("");
+			int arg3count = 0;
+
+			if (outputMode)
+			{
+				Console.WriteLine("Enter Output Mode");
+			}
+			else 
+			{
+				Console.WriteLine("Enter Simulation Mode");
+			}
+
+			for (int i = 0; i < arg2; i++)
+			{
+				String[] lines = System.IO.File.ReadAllLines(args[0]);
+
+				String[] output = (outputMode)? new String[lines.Length] : null;
+				StreamWriter sw = (outputMode)? new StreamWriter(arg3 + arg3count + ".txt") : null;
+
+				bool mode_command = false;
+				bool mode_text = false;
+
+				Console.WriteLine(arg3count + " : (");
+
+				foreach (String line in lines)
+				{
+					if (line.Equals("{")) mode_command = true;
+					if (line.Equals("}")) mode_command = false;
+					if (line.Equals("\""))
+					{
+						mode_text = (mode_text) ? false : true;
+						continue;
+					}
+
+					if (mode_command)
+					{
+						envirMain.execute(line);
+					}
+
+					if (mode_text)
+					{
+						String temp = line;
+						while (temp.Contains("{"))
+						{
+							String original = temp.Substring(temp.IndexOf("{"), temp.IndexOf("}") + 1 - temp.IndexOf("{"));
+							temp = temp.Replace(original, envirMain.solveExpression(envirMain.toExpression(original.Substring(1, original.Length - 2))));
+						}
+						Console.WriteLine(temp);
+						if (outputMode)
+							sw.WriteLine(temp);
+						
+					}
+				}
+				arg3count++;
+				Console.WriteLine(")");
+
+				// re-new all variable
+				envirMain.execute("!clear*");
+				envirMain.run("name");
+			}
+		}
+
+
+		// interpretMode
+		Console.WriteLine("Enter Interpret Mode");
+
 		while (true)
 		{
+			Console.Write("> ");
 			String command = Console.ReadLine();
 			if (command.Equals("/")) {
 				break;
@@ -20,7 +95,7 @@ public class Program
 			Console.WriteLine(envirMain.solveExpression(envirMain.toExpression(command)));
 		}
 		
-		Console.WriteLine("Halted");
+		Console.WriteLine("- Halted -");
 	}
 
 	interface Operation
@@ -214,7 +289,7 @@ public class Program
 		public Expression toExpression(String expression)
 		{
 			if (expression == null || expression.Equals("")) return null; // null check
-			String exp = trim(expression).Replace(" ", "");
+			String exp = trim(expression).Replace(" ", "").Replace("\t", "");
 			int floor;
 			
 			foreach (Operator oper in operList)
@@ -240,10 +315,21 @@ public class Program
 			return new Expression(exp);
 		}
 
+		public void execute(String expression)
+		{
+			executeExpression(toExpression(expression));
+		}
+
+		public void run(String expression)
+		{
+			Console.WriteLine(solveExpression(toExpression(expression)));
+		}
+
 		public void executeExpression(Expression expression)
 		{
 			solveExpression(expression, false);
 		}
+
 
 		public String solveExpression(Expression expression)
 		{
@@ -367,8 +453,21 @@ public class Program
 			constructOperation_HigherOrder("->", (L, R) =>
 			{
 				if (L != null && R != null)
-					if()envir.unstableMap.Add(L.getValue(), R);
+					if (envir.unstableMap.ContainsKey(L.getValue()))
+					{
+						envir.unstableMap[L.getValue()] = R;
+					}
+					else
+					{
+						envir.unstableMap.Add(L.getValue(), R);
+					}
 				return envir.solveExpression(L);
+			});
+			constructOperation_HigherOrder("!clear*", (L, R) =>
+			{
+				envir.variableMap = new Dictionary<String, String>();
+				envir.unstableMap = new Dictionary<String, Expression>();
+				return null;
 			});
 			constructOperation_HigherOrder("!clear", (L, R) =>
 			{
@@ -387,7 +486,7 @@ public class Program
 			});
 			constructOperation("|", (L, R) => 
 			{
-				return ((rand.Next() % 10) > 0.5) ? L : R; 
+				return ((rand.Next() % 10) > 5) ? L : R;
 			});
 			constructOperation("~", (L, R) => 
 			{
@@ -483,7 +582,16 @@ public class Program
 			});
 			constructOperation_HigherOrder("=", (L, R) =>
 			{
-				if (L != null && R != null) envir.variableMap.Add(envir.solveExpression(L, true), envir.solveExpression(R));
+				if (L != null && R != null)
+					if (envir.variableMap.ContainsKey(envir.solveExpression(L, true)))
+					{
+						envir.variableMap[envir.solveExpression(L, true)] = envir.solveExpression(R);
+					}
+					else 
+					{
+						envir.variableMap.Add(envir.solveExpression(L, true), envir.solveExpression(R));
+					}
+					
 				return envir.solveExpression(L);
 			});
 			constructOperation_HigherOrder("[^]", (L, R) => 
